@@ -1,22 +1,32 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk  # For displaying the selected image
 
-def configure_grid(layout: tk.Tk, row: int, col: int, row_weight: list = None, col_weight: list = None):
+PAD_DEFAULT = 20
+PAD_HIGHER = 60
+INPUT_IMAGE = None
+RESULT_IMAGE = None
+IMAGE_WIDTH = 480
+IMAGE_HEIGHT = 270
+
+def configure_grid(layout: tk.Tk, row: int, col: int, row_weight: list = None, col_weight: list = None, row_minsize: list = None, col_minsize: list = None):
   # Assume len(row_weight) = row and len(col_weight) = col
   for i in range(row):
-    if (row_weight is not None):
-      layout.rowconfigure(i, weight=row_weight[i])
+    if (row_minsize is not None and row_minsize[i] is not None):
+      layout.rowconfigure(i, weight=row_weight[i], minsize=row_minsize[i])
     else:
-      layout.rowconfigure(i, weight=1)
+      layout.rowconfigure(i, weight=row_weight[i])
 
   for j in range(col):
-    if (col_weight is not None):
-      layout.columnconfigure(j, weight=col_weight[j])
+    if (col_minsize is not None and col_minsize[j] is not None):
+      layout.columnconfigure(j, weight=col_weight[j], minsize=col_minsize[j])
     else:
-      layout.columnconfigure(j, weight=1)
+      layout.columnconfigure(j, weight=col_weight[j])
+
 
 def select_input_image():
+    global INPUT_IMAGE
     # Open a file dialog to select an image
     file_path = filedialog.askopenfilename(
         title="Select an Image",
@@ -27,18 +37,44 @@ def select_input_image():
     if file_path:
         # Display the selected file path
         selected_image_name.config(text=f"{filename}", fg="blue")
-        
          # Load and display the image
         img = Image.open(file_path)
-        img = img.resize((480,270))
+        img = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
+        INPUT_IMAGE = img
         img_tk = ImageTk.PhotoImage(img)
 
         image_display_input_img.config(image=img_tk)
-        image_display_input_img.image = img_tk  # Keep a reference to avoid garbage collection
-        
+        image_display_input_img.image = img_tk  # Keep a reference to avoid garbage collection  
     else:
         selected_image_name.config(text="No Selected Image", fg='red')
 
+def process_image():
+    global RESULT_IMAGE
+    img = INPUT_IMAGE
+    if (img is not None):
+      # TO DO
+      RESULT_IMAGE = img # change this to detection function
+      img_tk = ImageTk.PhotoImage(RESULT_IMAGE)
+      image_display_result_img.config(image=img_tk)
+      image_display_result_img.image = img_tk
+    return img
+
+def resize_image(event):
+    # Get the new dimensions of the window
+    new_width = event.width
+    new_height = event.height
+
+    # Resize the image to fit the new dimensions
+    resized_input = INPUT_IMAGE.resize((new_width, new_height), Image.ANTIALIAS)
+    resized_input_tk = ImageTk.PhotoImage(resized_input)
+    resized_result = RESULT_IMAGE.resize((new_width, new_height), Image.ANTIALIAS)
+    resized_result_tk = ImageTk.PhotoImage(resized_result)
+
+    # Update the label with the resized image
+    image_display_input_img.config(image=resized_input_tk)
+    image_display_input_img.image = resized_input_tk
+    image_display_result_img.config(image=resized_result_tk)
+    image_display_result_img.image = resized_result_tk
 
 
 if __name__ == "__main__":
@@ -46,13 +82,17 @@ if __name__ == "__main__":
   root = tk.Tk()
   root.title("Vehicle Recognition")
   root.geometry("1280x720")
-  configure_grid(root, 1, 2, None, [1,3])
+  # Set the window to fullscreen
+  root.state("zoomed")
+  configure_grid(root, 1, 3, [1], [0,4,0], None, [300, None, 300])
+  # root.bind("<Configure>", resize_image)
 
-  ##############################################
+
+  ######################################################
   # Control panel
   panel = tk.Frame(root)
-  panel.grid(row=0, column=0, sticky='nesw')
-  configure_grid(panel, 10, 1)
+  panel.grid(row=0, column=0, sticky='nesw', padx=PAD_DEFAULT, pady=PAD_DEFAULT)
+  configure_grid(panel, 8, 1, [1,1,1,1,1,1,1,1], [1]) 
 
   # Title
   title = tk.Label(panel, text="Vehicle Recognition", font=("Helvetica", 16, "bold"))
@@ -62,44 +102,70 @@ if __name__ == "__main__":
   # Image Input Buttons
   image_input_grid = tk.Frame(panel)
   image_input_grid.grid(row=1, column=0, sticky='nsew')
-  configure_grid(image_input_grid, 2, 2)
+  configure_grid(image_input_grid, 2, 2, [1, 1], [1, 1])
   # Top Left: Label
-  image_input_label = tk.Label(image_input_grid, text="Input Image:", font=("Helvetica", 12), anchor="w")
-  image_input_label.grid(row=0, column=0)
+  image_input_label = tk.Label(image_input_grid, text="Input Image", font=("Helvetica", 12))
+  image_input_label.grid(row=0, column=0, sticky="wns", padx=PAD_DEFAULT)
   # Top Right : Button
-  button = tk.Button(image_input_grid, text="Select Image", command=select_input_image, font=("Helvetica", 12), anchor="w")
-  button.grid(row=0, column=1)
-  # Bottom Left: Selected Label
-  selected_image_label = tk.Label(image_input_grid, text="Selected Image:", font=("Helvetica", 12), anchor="w")
-  selected_image_label.grid(row=1, column=0)
-  # Bottom Right: Selected Name
-  selected_image_name = tk.Label(image_input_grid, text="No Selected Image", font=("Helvetica", 12), fg="red", anchor="w")
-  selected_image_name.grid(row=1, column=1)
+  button = tk.Button(image_input_grid, text="Select Image", command=select_input_image, font=("Helvetica", 12))
+  button.grid(row=0, column=1, sticky="nswe", padx=PAD_DEFAULT)
+  # Bottom Left: Selected Name
+  selected_image_name = tk.Label(image_input_grid, text="No Selected Image", font=("Helvetica", 12), fg="red")
+  selected_image_name.grid(row=1, column=0, sticky="wn", padx=PAD_DEFAULT)
 
 
+  # Method Dropdown
+  method_dropdown_grid = tk.Frame(panel)
+  method_dropdown_grid.grid(row=2, column=0, sticky="nsew")
+  configure_grid(method_dropdown_grid, 1, 2, [1], [1, 1])
+  # Label
+  method_dropdown_label = tk.Label(method_dropdown_grid, text="Recognition Method", font=("Helvetica", 12))
+  method_dropdown_label.grid(row=0, column=0, sticky="nsw", padx=PAD_DEFAULT)
+  # Dropdown
+  method_options = ['Conventional', 'Deep Learning']
+  method_dropdown_dropdown = ttk.Combobox(method_dropdown_grid, values=method_options, state="readonly")
+  method_dropdown_dropdown.set("Conventional")
+  method_dropdown_dropdown.grid(row=0, column=1, sticky="wns")
+
+
+  # Execute Button
+  execute_button = tk.Button(panel, text="Execute", command=process_image, font=("Helvetica", 12))
+  execute_button.grid(row=3, column=0, sticky="nesw", padx=PAD_DEFAULT, pady=PAD_HIGHER)
 
 
   ######################################################
   # Image display
-  img_display_grid = tk.Frame(root, bg='lightblue')
+  img_display_grid = tk.Frame(root, bg='white', padx=PAD_DEFAULT, pady=PAD_DEFAULT)
   img_display_grid.grid(row=0, column=1, sticky='nsew')
-  configure_grid(img_display_grid, 2, 1)
+  configure_grid(img_display_grid, 2, 1, [1, 1], [1])
 
   # Display Input
-  image_display_input_grid = tk.Frame(img_display_grid)
-  image_display_input_grid.grid(row=0, column=0)
-  configure_grid(image_display_input_grid, 2, 1, [4, 1], None)
-  image_display_input_label = tk.Label(image_display_input_grid, text="Input Image Display", font=("Helvetica", 12), anchor="w")
-  image_display_input_label.grid(row=0, column=0)
-  image_display_input_img = tk.Label(image_display_input_grid)
-  image_display_input_img.grid(row=1, column=0)
+  image_display_input_grid = tk.Frame(img_display_grid, bg="white")
+  image_display_input_grid.grid(row=0, column=0, sticky="news")
+  configure_grid(image_display_input_grid, 2, 1, [0, 1], [1], [20, IMAGE_HEIGHT])
+  image_display_input_label = tk.Label(image_display_input_grid, text="Input Image Display", font=("Helvetica", 16, "bold"), pady=PAD_DEFAULT)
+  image_display_input_label.grid(row=0, column=0, sticky="news")
+  image_display_input_img = tk.Label(image_display_input_grid, bg="white")
+  image_display_input_img.grid(row=1, column=0, sticky="news")
 
-
-  
 
   # Display Result
-  image_display_result_grid = tk.Frame(img_display_grid)
-  image_display_result_grid.grid(row=1, column=0)
+  image_display_result_grid = tk.Frame(img_display_grid, bg="white")
+  image_display_result_grid.grid(row=1, column=0, sticky="news")
+  configure_grid(image_display_result_grid, 2, 1, [0, 1], [1], [20, IMAGE_HEIGHT])
+  image_display_result_label = tk.Label(image_display_result_grid, text="Result Image Display", font=("Helvetica", 16, "bold"), pady=PAD_DEFAULT)
+  image_display_result_label.grid(row=0, column=0, sticky="news")
+  image_display_result_img = tk.Label(image_display_result_grid, bg="white")
+  image_display_result_img.grid(row=1, column=0, sticky="news")
+
+  ######################################################
+  # Result Panel
+  result_panel = tk.Frame(root)
+  result_panel.grid(row=0, column=2, sticky='nesw', padx=PAD_DEFAULT, pady=PAD_DEFAULT)
+  configure_grid(result_panel, 2, 1, [0, 1], [1])
+
+  result_panel_title = tk.Label(result_panel, text="Result Log", font=("Helvetica", 16, "bold"))
+  result_panel_title.grid(row=0, column=0, sticky='nsew')
 
   # Run the application
   root.mainloop()
