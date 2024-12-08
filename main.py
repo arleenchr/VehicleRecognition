@@ -3,8 +3,9 @@ from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk  # For displaying the selected image
 
+PAD_SMALLER = 10
 PAD_DEFAULT = 20
-PAD_HIGHER = 60
+PAD_HIGHER = 40
 INPUT_IMAGE = None
 RESULT_IMAGE = None
 IMAGE_WIDTH = 480
@@ -39,8 +40,8 @@ def select_input_image():
         selected_image_name.config(text=f"{filename}", fg="blue")
          # Load and display the image
         img = Image.open(file_path)
-        img = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
         INPUT_IMAGE = img
+        img = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
         img_tk = ImageTk.PhotoImage(img)
 
         image_display_input_img.config(image=img_tk)
@@ -52,29 +53,20 @@ def process_image():
     global RESULT_IMAGE
     img = INPUT_IMAGE
     if (img is not None):
-      # TO DO
-      RESULT_IMAGE = img # change this to detection function
-      img_tk = ImageTk.PhotoImage(RESULT_IMAGE)
+      selection = method_dropdown_dropdown.get()
+      if (selection == "Conventional"):
+        # TO DO
+        RESULT_IMAGE = img # change this to detection function
+      else: # selection == "Deep Learning"
+        # TO DO
+        RESULT_IMAGE = img # change this to detection function
+      result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
+      img_tk = ImageTk.PhotoImage(result_img)
       image_display_result_img.config(image=img_tk)
       image_display_result_img.image = img_tk
+    else :
+      print("[ERROR] INPUT_IMAGE is None")
     return img
-
-def resize_image(event):
-    # Get the new dimensions of the window
-    new_width = event.width
-    new_height = event.height
-
-    # Resize the image to fit the new dimensions
-    resized_input = INPUT_IMAGE.resize((new_width, new_height), Image.ANTIALIAS)
-    resized_input_tk = ImageTk.PhotoImage(resized_input)
-    resized_result = RESULT_IMAGE.resize((new_width, new_height), Image.ANTIALIAS)
-    resized_result_tk = ImageTk.PhotoImage(resized_result)
-
-    # Update the label with the resized image
-    image_display_input_img.config(image=resized_input_tk)
-    image_display_input_img.image = resized_input_tk
-    image_display_result_img.config(image=resized_result_tk)
-    image_display_result_img.image = resized_result_tk
 
 
 if __name__ == "__main__":
@@ -83,9 +75,12 @@ if __name__ == "__main__":
   root.title("Vehicle Recognition")
   root.geometry("1280x720")
   # Set the window to fullscreen
-  root.state("zoomed")
+  # root.state("zoomed")
   configure_grid(root, 1, 3, [1], [0,4,0], None, [300, None, 300])
-  # root.bind("<Configure>", resize_image)
+
+  # Style Dropdown
+  style = ttk.Style()
+  style.configure("TCombobox", font=("Helvetica", 12), background="white", padding=PAD_SMALLER)
 
 
   ######################################################
@@ -102,35 +97,35 @@ if __name__ == "__main__":
   # Image Input Buttons
   image_input_grid = tk.Frame(panel)
   image_input_grid.grid(row=1, column=0, sticky='nsew')
-  configure_grid(image_input_grid, 2, 2, [1, 1], [1, 1])
+  configure_grid(image_input_grid, 2, 2, [1, 1], [1, 1], None, [200, None])
   # Top Left: Label
-  image_input_label = tk.Label(image_input_grid, text="Input Image", font=("Helvetica", 12))
-  image_input_label.grid(row=0, column=0, sticky="wns", padx=PAD_DEFAULT)
+  image_input_label = tk.Label(image_input_grid, text="Input Image", font=("Helvetica", 12, "bold"), padx=PAD_DEFAULT)
+  image_input_label.grid(row=0, column=0, sticky="wns")
   # Top Right : Button
-  button = tk.Button(image_input_grid, text="Select Image", command=select_input_image, font=("Helvetica", 12))
-  button.grid(row=0, column=1, sticky="nswe", padx=PAD_DEFAULT)
+  button = tk.Button(image_input_grid, text="Browse Image...", command=select_input_image, font=("Helvetica", 12), bg='white', cursor="hand2", padx=PAD_DEFAULT)
+  button.grid(row=0, column=1)
   # Bottom Left: Selected Name
-  selected_image_name = tk.Label(image_input_grid, text="No Selected Image", font=("Helvetica", 12), fg="red")
-  selected_image_name.grid(row=1, column=0, sticky="wn", padx=PAD_DEFAULT)
+  selected_image_name = tk.Label(image_input_grid, text="No Selected Image", font=("Helvetica", 12), fg="red", padx=PAD_DEFAULT)
+  selected_image_name.grid(row=1, column=0, sticky="wn")
 
 
   # Method Dropdown
   method_dropdown_grid = tk.Frame(panel)
   method_dropdown_grid.grid(row=2, column=0, sticky="nsew")
-  configure_grid(method_dropdown_grid, 1, 2, [1], [1, 1])
+  configure_grid(method_dropdown_grid, 1, 2, [1], [1, 1], None, [200, None])
   # Label
-  method_dropdown_label = tk.Label(method_dropdown_grid, text="Recognition Method", font=("Helvetica", 12))
-  method_dropdown_label.grid(row=0, column=0, sticky="nsw", padx=PAD_DEFAULT)
+  method_dropdown_label = tk.Label(method_dropdown_grid, text="Recognition Method", font=("Helvetica", 12, "bold"), padx=PAD_DEFAULT)
+  method_dropdown_label.grid(row=0, column=0, sticky="nsw")
   # Dropdown
   method_options = ['Conventional', 'Deep Learning']
-  method_dropdown_dropdown = ttk.Combobox(method_dropdown_grid, values=method_options, state="readonly")
+  method_dropdown_dropdown = ttk.Combobox(method_dropdown_grid, values=method_options, state="readonly", cursor="hand2")
   method_dropdown_dropdown.set("Conventional")
-  method_dropdown_dropdown.grid(row=0, column=1, sticky="wns")
+  method_dropdown_dropdown.grid(row=0, column=1, sticky="ew")
 
 
   # Execute Button
-  execute_button = tk.Button(panel, text="Execute", command=process_image, font=("Helvetica", 12))
-  execute_button.grid(row=3, column=0, sticky="nesw", padx=PAD_DEFAULT, pady=PAD_HIGHER)
+  execute_button = tk.Button(panel, text="Execute", command=process_image, font=("Helvetica", 16, "bold"), bg="black", fg="white", cursor="hand2", padx=PAD_HIGHER, pady=PAD_SMALLER)
+  execute_button.grid(row=3, column=0, padx=PAD_DEFAULT)
 
 
   ######################################################
