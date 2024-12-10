@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk  # For displaying the selected image
+import numpy as np
+
+from conventional.preprocessing import preprocess_image
 
 PAD_SMALLER = 10
 PAD_DEFAULT = 20
@@ -54,11 +57,14 @@ def process_image():
     img = INPUT_IMAGE
     if (img is not None):
       selection = method_dropdown_dropdown.get()
-      if (selection == "Conventional"):
-        # TO DO
-        RESULT_IMAGE = img # change this to detection function
+      if selection == "Conventional":
+        features, visualization_image = preprocess_image(img)
+        print("Feature vector length:", len(features))
+        RESULT_IMAGE = Image.fromarray((visualization_image))
+        print("Conventional processing completed.")
       else: # selection == "Deep Learning"
         # TO DO
+        print("Deep Learning")
         RESULT_IMAGE = img # change this to detection function
       result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
       img_tk = ImageTk.PhotoImage(result_img)
