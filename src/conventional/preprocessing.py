@@ -13,7 +13,7 @@ def preprocess_image(pil_image):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     # Resize the image to a fixed size
-    resized = cv2.resize(gray, (128, 128))
+    resized = cv2.resize(gray, (1200, 800))
     
     # Normalize pixel values to [0, 1]
     normalized = resized / 255.0
@@ -35,10 +35,21 @@ def preprocess_image(pil_image):
         transform_sqrt=True
     )
     
-    # Enhance HOG visualization by scaling to 0-255 and converting to uint8
-    hog_image = (hog_image - hog_image.min()) / (hog_image.max() - hog_image.min())  # Normalize to 0-1
-    hog_image = (hog_image * 255).astype(np.uint8)  # Scale to 0-255
-        
-    combined_features = np.concatenate([hog_features, edges.flatten()])
+    # Ensure the edge features are flattened to match the expected size
+    edges_flattened = edges.flatten()
+    hog_features_length = len(hog_features)
+    edges_needed = 2880000 - hog_features_length
     
-    return combined_features, hog_image
+    # Adjust edge features to match the required size
+    if edges_flattened.size > edges_needed:
+        edges_flattened = edges_flattened[:edges_needed]
+    else:
+        edges_flattened = np.pad(edges_flattened, (0, edges_needed - edges_flattened.size), mode='constant')
+    
+    # Enhance HOG visualization by scaling to 0-255 and converting to uint8
+    # hog_image = (hog_image - hog_image.min()) / (hog_image.max() - hog_image.min())  # Normalize to 0-1
+    # hog_image = (hog_image * 255).astype(np.uint8)  # Scale to 0-255
+        
+    combined_features = np.concatenate([hog_features, edges_flattened])
+    
+    return combined_features

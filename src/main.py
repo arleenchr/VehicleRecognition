@@ -1,9 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from PIL import Image, ImageTk  # For displaying the selected image
-import numpy as np
+from PIL import Image, ImageTk, ImageDraw, ImageFont
 
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report
+
+from conventional.load_dataset import load_dataset
 from conventional.preprocessing import preprocess_image
 
 PAD_SMALLER = 10
@@ -54,26 +58,67 @@ def select_input_image():
 
 def process_image():
     global RESULT_IMAGE
-    img = INPUT_IMAGE
-    if (img is not None):
-      selection = method_dropdown_dropdown.get()
-      if selection == "Conventional":
-        features, visualization_image = preprocess_image(img)
-        print("Feature vector length:", len(features))
-        RESULT_IMAGE = Image.fromarray((visualization_image))
-        print("Conventional processing completed.")
-      else: # selection == "Deep Learning"
-        # TO DO
-        print("Deep Learning")
-        RESULT_IMAGE = img # change this to detection function
-      result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
-      img_tk = ImageTk.PhotoImage(result_img)
-      image_display_result_img.config(image=img_tk)
-      image_display_result_img.image = img_tk
-    else :
-      print("[ERROR] INPUT_IMAGE is None")
-    return img
+    img = INPUT_IMAGE  # Use your input image here
+    if img is not None:
+        selection = method_dropdown_dropdown.get()
+        if selection == "Conventional":
+            # Load dataset
+            dataset_path = "dataset"  # Path to the dataset folder
+            features, labels = load_dataset(dataset_path)  # Features are raw dataset features
+            print("Features shape:", features.shape)
 
+            # Split the dataset
+            X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
+            
+            print("Training set size:", X_train.shape[0])
+            print("Test set size:", X_test.shape[0])
+
+            # Train the KNN classifier
+            knn = KNeighborsClassifier(n_neighbors=5)
+            knn.fit(X_train, y_train)
+
+            # Evaluate the model
+            y_pred = knn.predict(X_test)
+            print(classification_report(y_test, y_pred, zero_division=0))
+
+            # Preprocess the new input image
+            new_features = preprocess_image(img.convert('RGB'))
+            new_features = new_features.reshape(1, -1)  # Ensure it has the correct shape for prediction
+            print("New features shape:", new_features.shape)
+            
+            # Predict a new image
+            prediction = knn.predict(new_features)
+            # Show all results of the prediction
+            print("All Predictions:", knn.predict_proba(new_features))
+            print("Predicted Class:", prediction[0])
+            
+            # Add text overlay with the predicted class
+            overlay_img = img.copy()
+            draw = ImageDraw.Draw(overlay_img)
+            font = ImageFont.load_default()
+                
+            text = f"Class: {prediction[0]}"
+            text_position = (20, 20)  # Adjust position as needed
+            text_color = (255, 0, 0)  # Red color for the text
+            draw.text(text_position, text, fill=text_color, font=font)
+            
+            accuracy_text = f"Accuracy: {knn.predict_proba(new_features).max() * 100:.2f}%"
+            accuracy_position = (20, 40)  # Adjust position as needed
+            draw.text(accuracy_position, accuracy_text, fill=text_color, font=font)
+
+            RESULT_IMAGE = overlay_img
+
+        else:  # selection == "Deep Learning"
+            # TO DO
+            print("Deep Learning")
+            RESULT_IMAGE = img  # Placeholder for detection function
+        result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
+        img_tk = ImageTk.PhotoImage(result_img)
+        image_display_result_img.config(image=img_tk)
+        image_display_result_img.image = img_tk
+    else:
+        print("[ERROR] INPUT_IMAGE is None")
+    return img
 
 if __name__ == "__main__":
   # Create the main application window
