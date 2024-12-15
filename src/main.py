@@ -5,7 +5,9 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 from conventional.load_dataset import load_dataset
 from conventional.preprocessing import preprocess_image
@@ -63,12 +65,22 @@ def process_image():
         selection = method_dropdown_dropdown.get()
         if selection == "Conventional":
             # Load dataset
-            dataset_path = "dataset"  # Path to the dataset folder
+            dataset_path = ["training_dataset/dataset (1)", "training_dataset/dataset (2)"]
             features, labels = load_dataset(dataset_path)  # Features are raw dataset features
             print("Features shape:", features.shape)
+            
+            # Feature scaling
+            scaler = StandardScaler()
+            features_scaled = scaler.fit_transform(features)
+            print("Features scaled.")
+
+            # Dimensionality reduction with PCA
+            pca = PCA(n_components=0.95)  # Retain 95% variance
+            features_reduced = pca.fit_transform(features_scaled)
+            print("Features reduced to shape:", features_reduced.shape)
 
             # Split the dataset
-            X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(features_reduced, labels, test_size=0.2, random_state=42, stratify=labels)
             
             print("Training set size:", X_train.shape[0])
             print("Test set size:", X_test.shape[0])
@@ -80,9 +92,10 @@ def process_image():
             # Evaluate the model
             y_pred = knn.predict(X_test)
             print(classification_report(y_test, y_pred, zero_division=0))
+            print(confusion_matrix(y_test, y_pred))
 
             # Preprocess the new input image
-            new_features = preprocess_image(img.convert('RGB'))
+            new_features = preprocess_image(img.convert('RGB'), features_reduced.shape[1])
             new_features = new_features.reshape(1, -1)  # Ensure it has the correct shape for prediction
             print("New features shape:", new_features.shape)
             
