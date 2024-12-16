@@ -3,14 +3,8 @@ from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-
-from conventional.load_dataset import load_dataset
-from conventional.preprocessing import preprocess_image
+from conventional.classification.knn import knn
+from conventional.classification.svm import svm
 
 PAD_SMALLER = 10
 PAD_DEFAULT = 20
@@ -65,45 +59,9 @@ def process_image():
         selection = method_dropdown_dropdown.get()
         if selection == "Conventional":
             # Load dataset
-            dataset_path = ["training_dataset/dataset (1)", "training_dataset/dataset (2)"]
-            features, labels = load_dataset(dataset_path)  # Features are raw dataset features
-            print("Features shape:", features.shape)
-            
-            # Feature scaling
-            scaler = StandardScaler()
-            features_scaled = scaler.fit_transform(features)
-            print("Features scaled.")
-
-            # Dimensionality reduction with PCA
-            pca = PCA(n_components=0.95)  # Retain 95% variance
-            features_reduced = pca.fit_transform(features_scaled)
-            print("Features reduced to shape:", features_reduced.shape)
-
-            # Split the dataset
-            X_train, X_test, y_train, y_test = train_test_split(features_reduced, labels, test_size=0.2, random_state=42, stratify=labels)
-            
-            print("Training set size:", X_train.shape[0])
-            print("Test set size:", X_test.shape[0])
-
-            # Train the KNN classifier
-            knn = KNeighborsClassifier(n_neighbors=5)
-            knn.fit(X_train, y_train)
-
-            # Evaluate the model
-            y_pred = knn.predict(X_test)
-            print(classification_report(y_test, y_pred, zero_division=0))
-            print(confusion_matrix(y_test, y_pred))
-
-            # Preprocess the new input image
-            new_features = preprocess_image(img.convert('RGB'), features_reduced.shape[1])
-            new_features = new_features.reshape(1, -1)  # Ensure it has the correct shape for prediction
-            print("New features shape:", new_features.shape)
-            
-            # Predict a new image
-            prediction = knn.predict(new_features)
-            # Show all results of the prediction
-            print("All Predictions:", knn.predict_proba(new_features))
-            print("Predicted Class:", prediction[0])
+            dataset_path = ["training_dataset/dataset (1)"]
+            # Use this if needed: "training_dataset/dataset (2)"
+            prediction, proba = svm(dataset_path, img)
             
             # Add text overlay with the predicted class
             overlay_img = img.copy()
@@ -115,12 +73,11 @@ def process_image():
             text_color = (255, 0, 0)  # Red color for the text
             draw.text(text_position, text, fill=text_color, font=font)
             
-            accuracy_text = f"Accuracy: {knn.predict_proba(new_features).max() * 100:.2f}%"
+            accuracy_text = f"Accuracy: {proba.max() * 100:.2f}%"
             accuracy_position = (20, 40)  # Adjust position as needed
             draw.text(accuracy_position, accuracy_text, fill=text_color, font=font)
 
             RESULT_IMAGE = overlay_img
-
         else:  # selection == "Deep Learning"
             # TO DO
             print("Deep Learning")
