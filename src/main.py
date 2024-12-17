@@ -6,13 +6,18 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 from conventional.classification.knn import knn
 from conventional.classification.svm import svm
 
+from .deep_learning.preprocessing import *
+from .deep_learning.model import *
+
 PAD_SMALLER = 10
 PAD_DEFAULT = 20
 PAD_HIGHER = 40
 INPUT_IMAGE = None
+INPUT_IMAGE_PATH = None
 RESULT_IMAGE = None
 IMAGE_WIDTH = 480
 IMAGE_HEIGHT = 270
+DL_MODEL = None
 
 def configure_grid(layout: tk.Tk, row: int, col: int, row_weight: list = None, col_weight: list = None, row_minsize: list = None, col_minsize: list = None):
   # Assume len(row_weight) = row and len(col_weight) = col
@@ -30,7 +35,7 @@ def configure_grid(layout: tk.Tk, row: int, col: int, row_weight: list = None, c
 
 
 def select_input_image():
-    global INPUT_IMAGE
+    global INPUT_IMAGE, INPUT_IMAGE_PATH
     # Open a file dialog to select an image
     file_path = filedialog.askopenfilename(
         title="Select an Image",
@@ -41,6 +46,7 @@ def select_input_image():
     if file_path:
         # Display the selected file path
         selected_image_name.config(text=f"{filename}", fg="blue")
+        INPUT_IMAGE_PATH = file_path
          # Load and display the image
         img = Image.open(file_path)
         INPUT_IMAGE = img
@@ -52,9 +58,25 @@ def select_input_image():
     else:
         selected_image_name.config(text="No Selected Image", fg='red')
 
+def load_model():
+    global DL_MODEL
+    if DL_MODEL is None:
+        data_dir = './training_dataset/dataset (1)'
+        filepaths, labels = generate_data_paths(data_dir)
+        df = create_df(filepaths, labels)
+
+        train_df, valid_df, test_df = split_dataset(df)
+        train_gen, valid_gen, test_gen = generate_image_data(train_df, valid_df, test_df)
+
+        DL_MODEL = create_model_structure(train_gen)
+        DL_MODEL.load_weights('./src/deep_learning/my_model_weights.h5')
+    
+    return DL_MODEL
+
 def process_image():
     global RESULT_IMAGE
     img = INPUT_IMAGE  # Use your input image here
+    img_path = INPUT_IMAGE_PATH
     if img is not None:
         selection = method_dropdown_dropdown.get()
         if selection == "Conventional":
@@ -81,6 +103,12 @@ def process_image():
         else:  # selection == "Deep Learning"
             # TO DO
             print("Deep Learning")
+            
+            model = load_model()
+            class_labels = ['Bus', 'Car', 'Truck', 'Motorcycle']
+            predicted_class_label = predict_class(img_path, model, class_labels)
+            print(predicted_class_label)
+
             RESULT_IMAGE = img  # Placeholder for detection function
         result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
         img_tk = ImageTk.PhotoImage(result_img)
