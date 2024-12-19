@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk, ImageDraw, ImageFont
+import cv2
 
 from conventional.classification.knn import knn
 from conventional.classification.svm import svm
@@ -15,7 +16,7 @@ PAD_HIGHER = 40
 INPUT_IMAGE = None
 INPUT_IMAGE_PATH = None
 RESULT_IMAGE = None
-IMAGE_WIDTH = 480
+IMAGE_WIDTH = 360
 IMAGE_HEIGHT = 270
 DL_MODEL = None
 
@@ -50,7 +51,7 @@ def select_input_image():
          # Load and display the image
         img = Image.open(file_path)
         INPUT_IMAGE = img
-        img = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
+        img = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
         img_tk = ImageTk.PhotoImage(img)
 
         image_display_input_img.config(image=img_tk)
@@ -110,7 +111,7 @@ def process_image():
             print(predicted_class_label)
 
             RESULT_IMAGE = img  # Placeholder for detection function
-        result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT), Image.ANTIALIAS)
+        result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
         img_tk = ImageTk.PhotoImage(result_img)
         image_display_result_img.config(image=img_tk)
         image_display_result_img.image = img_tk

@@ -21,7 +21,7 @@ def load_dataset(dataset_paths):
                     try:
                         # Load and preprocess the image
                         image = Image.open(image_path).convert('RGB')  # Ensure 3 channels
-                        image = image.resize((256, 256), Image.ANTIALIAS)  # Resize image
+                        image = image.resize((256, 256))  # Resize image
                         
                         # Extract features using preprocess_image
                         feature_vector = preprocess_image(image, target_feature_size=1000)
