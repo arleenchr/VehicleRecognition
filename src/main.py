@@ -9,6 +9,7 @@ from conventional.classification.svm import svm
 
 from deep_learning.preprocessing import *
 from deep_learning.model import *
+from constant import IMAGE_HEIGHT, IMAGE_WIDTH
 
 PAD_SMALLER = 10
 PAD_DEFAULT = 20
@@ -16,8 +17,6 @@ PAD_HIGHER = 40
 INPUT_IMAGE = None
 INPUT_IMAGE_PATH = None
 RESULT_IMAGE = None
-IMAGE_WIDTH = 360
-IMAGE_HEIGHT = 270
 DL_MODEL = None
 
 def configure_grid(layout: tk.Tk, row: int, col: int, row_weight: list = None, col_weight: list = None, row_minsize: list = None, col_minsize: list = None):
