@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from conventional.load_dataset import load_dataset
 from conventional.preprocessing import preprocess_image
 import time
-# import cv2
+import cv2
 
 def svm(dataset_path, img):
     try:
@@ -44,7 +44,8 @@ def svm(dataset_path, img):
     print(confusion_matrix(y_test, y_pred))
 
     # Preprocess new image
-    new_features = preprocess_image(img.convert('RGB'), features.shape[1]).reshape(1, -1)
+    new_features, original_bgr = preprocess_image(img.convert('RGB'), features.shape[1], test_image=True)
+    new_features = new_features.reshape(1, -1)
     new_features = scaler.transform(new_features)
 
     # Predict new image
@@ -52,4 +53,4 @@ def svm(dataset_path, img):
     prediction = svm.predict(new_features)
     print(f"Predicted Class: {prediction[0]}, Probabilities: {proba[0]}")
 
-    return prediction, proba
+    return prediction, proba, original_bgr
