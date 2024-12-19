@@ -4,30 +4,31 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from conventional.load_dataset import load_dataset
-from conventional.preprocessing import preprocess_image
+from conventional.preprocess_image import preprocess_image
 import time
+import os
+import pickle
+from constant import DATASET_PATH
 
-def knn(dataset_path, img):
-    try:
-        features, labels = load_dataset(dataset_path)
-        print(f"Features shape: {features.shape}")
-    except Exception as e:
-        print(f"Error loading dataset: {e}")
-        return None, None
-            
+# KNN
+knn_model_file_path = os.path.join(os.getcwd(), 'src', 'conventional', 'model', 'knn_model.pkl')
+
+def train_knn(dataset_path):
+    features, labels = load_dataset(dataset_path)
+
     # Feature scaling
-    scaler = StandardScaler()
-    features_scaled = scaler.fit_transform(features)
-    print("Features scaled.")
+    # scaler = StandardScaler()
+    # features_scaled = scaler.fit_transform(features)
+    # print("Features scaled.")
 
-    # Dimensionality reduction with PCA
-    pca = PCA(n_components=0.95)  # Retain 95% variance
-    features_reduced = pca.fit_transform(features_scaled)
-    print("Features reduced to shape:", features_reduced.shape)
+    # # Dimensionality reduction with PCA
+    # pca = PCA(n_components=0.95)  # Retain 95% variance
+    # features_reduced = pca.fit_transform(features_scaled)
+    # print("Features reduced to shape:", features_reduced.shape)
 
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(
-        features_reduced, labels, test_size=0.2, stratify=labels, random_state=42
+        features, labels, test_size=0.2, stratify=labels, random_state=42
     )
             
     print("Training set size:", X_train.shape[0])
@@ -54,22 +55,31 @@ def knn(dataset_path, img):
     print(classification_report(y_test, y_pred, zero_division=0))
     print(confusion_matrix(y_test, y_pred))
 
-    # Preprocess the new input image
-    new_features = preprocess_image(img.convert('RGB'), features.shape[1])
-    new_features = new_features.reshape(1, -1)  # Ensure it has the correct shape for prediction
-    print("New features shape:", new_features.shape)
+    # Save Model
+    with open(knn_model_file_path, 'wb') as f:
+        pickle.dump(knn, f)
+
+def predict_knn(img):
+    feature, bounded_image = preprocess_image(img, target_feature_size=1000)
     
-    # Scale and reduce the new features
-    new_features = scaler.transform(new_features)
-    print("New features shape SCALER:", new_features.shape)
-    new_features = pca.transform(new_features)
-    print("New features shape PCA:", new_features.shape)
-            
-    # Predict a new image
-    prediction = knn.predict(new_features)
-    proba = knn.predict_proba(new_features)
-    # Show all results of the prediction
-    print("All Predictions:", proba)
-    print("Predicted Class:", prediction[0])
+    # Load Model
+    with open(knn_model_file_path, 'rb') as f:
+      knn = pickle.load(f)
+
+    # Preprocess new image
+    feature = feature.reshape(1, -1)
+    # scaler = MinMaxScaler()
+    # feature = scaler.fit_transform(feature)
     
-    return prediction, proba
+    # # Scale and reduce the new features
+    # new_features = scaler.transform(new_features)
+    # print("New features shape SCALER:", new_features.shape)
+    # new_features = pca.transform(new_features)
+    # print("New features shape PCA:", new_features.shape)
+    
+    # Predict new image
+    proba = knn.predict_proba(feature)
+    prediction = knn.predict(feature)
+    print(f"Predicted Class: {prediction[0]}, Probabilities: {proba[0]}")
+
+    return prediction, proba, bounded_image

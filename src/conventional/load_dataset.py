@@ -1,7 +1,8 @@
 import os
 import numpy as np
 from PIL import Image
-from conventional.preprocessing import preprocess_image
+from conventional.preprocess_image import preprocess_image
+from constant import IMAGE_HEIGHT, IMAGE_WIDTH
 
 # Assuming preprocess_image returns features and hog_image
 def load_dataset(dataset_paths):
@@ -9,6 +10,7 @@ def load_dataset(dataset_paths):
     labels = []
     
     for dataset_path in dataset_paths:
+        print(f'[PROCESSING DATASET] {dataset_path}')
         if not os.path.isdir(dataset_path):
             print(f"Dataset path '{dataset_path}' does not exist or is not a directory.")
             continue
@@ -18,13 +20,14 @@ def load_dataset(dataset_paths):
             if os.path.isdir(label_path):
                 for image_file in os.listdir(label_path):
                     image_path = os.path.join(label_path, image_file)
+                    print(f'[EXTRACTING FEATURE] {image_path}')
                     try:
                         # Load and preprocess the image
                         image = Image.open(image_path).convert('RGB')  # Ensure 3 channels
-                        image = image.resize((256, 256))  # Resize image
+                        image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))  # Resize image
                         
                         # Extract features using preprocess_image
-                        feature_vector = preprocess_image(image, target_feature_size=1000)
+                        feature_vector, _ = preprocess_image(image, target_feature_size=1000)
                         features.append(feature_vector)
                         labels.append(label)  # Label is the folder name
                     except Exception as e:
@@ -36,3 +39,4 @@ def load_dataset(dataset_paths):
         print(f"Number of images for label '{label}': {labels.count(label)}")
     
     return np.array(features), np.array(labels)
+

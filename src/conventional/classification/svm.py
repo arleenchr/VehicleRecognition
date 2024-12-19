@@ -3,25 +3,26 @@ from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 from conventional.load_dataset import load_dataset
-from conventional.preprocessing import preprocess_image
+from conventional.preprocess_image import preprocess_image
 import time
 import cv2
+import os
+import pickle
+from constant import DATASET_PATH
 
-def svm(dataset_path, img):
-    try:
-        features, labels = load_dataset(dataset_path)
-        print(f"Features shape: {features.shape}")
-    except Exception as e:
-        print(f"Error loading dataset: {e}")
-        return None, None
+# SVM
+svm_model_file_path = os.path.join(os.getcwd(), 'src', 'conventional', 'model', 'svm_model.pkl')
+
+def train_svm(dataset_path: list):
+    features, labels = load_dataset(dataset_path)
 
     # Feature scaling
-    scaler = StandardScaler()
-    features_scaled = scaler.fit_transform(features)
+    # scaler = StandardScaler()
+    # features_scaled = scaler.fit_transform(features)
 
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(
-        features_scaled, labels, test_size=0.2, stratify=labels, random_state=42
+        features, labels, test_size=0.2, stratify=labels, random_state=42
     )
 
     # Hyperparameter tuning
@@ -43,14 +44,26 @@ def svm(dataset_path, img):
     print(classification_report(y_test, y_pred, zero_division=0))
     print(confusion_matrix(y_test, y_pred))
 
+    # Save Model
+    with open(svm_model_file_path, 'wb') as f:
+        pickle.dump(svm, f)
+
+
+def predict_svm(img):
+    feature, bounded_image = preprocess_image(img, target_feature_size=1000)
+    
+    # Load Model
+    with open(svm_model_file_path, 'rb') as f:
+      svm = pickle.load(f)
+
     # Preprocess new image
-    new_features, original_bgr = preprocess_image(img.convert('RGB'), features.shape[1], test_image=True)
-    new_features = new_features.reshape(1, -1)
-    new_features = scaler.transform(new_features)
+    feature = feature.reshape(1, -1)
+    # scaler = MinMaxScaler()
+    # feature = scaler.fit_transform(feature)
 
     # Predict new image
-    proba = svm.predict_proba(new_features)
-    prediction = svm.predict(new_features)
+    proba = svm.predict_proba(feature)
+    prediction = svm.predict(feature)
     print(f"Predicted Class: {prediction[0]}, Probabilities: {proba[0]}")
 
-    return prediction, proba, original_bgr
+    return prediction, proba, bounded_image

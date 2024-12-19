@@ -28,7 +28,6 @@ def preprocess_image(pil_image, target_feature_size):
     )
     
     # Find the coordinates of the bounding box for HOG features
-    print(np.max(hog_image))
     binary_mask = (hog_image > 0.9).astype(np.uint8)  # Create a binary mask
     coords = cv2.findNonZero(binary_mask)  # Find non-zero coordinates
     
