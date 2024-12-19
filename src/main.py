@@ -6,8 +6,8 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 from conventional.classification.knn import knn
 from conventional.classification.svm import svm
 
-from .deep_learning.preprocessing import *
-from .deep_learning.model import *
+from deep_learning.preprocessing import *
+from deep_learning.model import *
 
 PAD_SMALLER = 10
 PAD_DEFAULT = 20
