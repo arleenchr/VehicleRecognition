@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from conventional.load_dataset import load_dataset
 from conventional.preprocessing import preprocess_image
 import time
+# import cv2
 
 def svm(dataset_path, img):
     try:
@@ -30,7 +31,7 @@ def svm(dataset_path, img):
         'gamma': ['scale', 'auto', 0.001, 0.01, 0.1, 1],
         'degree': [2, 3, 4]
     }
-    grid = GridSearchCV(SVC(probability=True), param_grid, cv=10, scoring='accuracy')
+    grid = GridSearchCV(SVC(probability=True), param_grid, cv=10, scoring='accuracy', n_jobs=-1)
     start_time = time.time()
     grid.fit(X_train, y_train)
     print(f"Best Parameters: {grid.best_params_}")

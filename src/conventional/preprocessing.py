@@ -2,7 +2,7 @@ from skimage.feature import hog
 import cv2
 import numpy as np
 
-def preprocess_image(pil_image, target_feature_size):
+def preprocess_image(pil_image, target_feature_size, test_image=False):
     # Convert PIL image to numpy array
     img = np.array(pil_image)
 
@@ -34,5 +34,11 @@ def preprocess_image(pil_image, target_feature_size):
         hog_features = hog_features[:target_feature_size]  # Trim excess features
     else:
         hog_features = np.pad(hog_features, (0, target_feature_size - len(hog_features)), mode='constant')  # Pad with zeros
+        
+    # Show the HOG image
+    if test_image:
+        cv2.imshow("HOG Image", hog_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-    return hog_features
+    return hog_features, hog_image
