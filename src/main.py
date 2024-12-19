@@ -8,6 +8,7 @@ from conventional.classification.svm import svm
 
 from .deep_learning.preprocessing import *
 from .deep_learning.model import *
+import cv2
 
 PAD_SMALLER = 10
 PAD_DEFAULT = 20
@@ -83,10 +84,10 @@ def process_image():
             # Load dataset
             dataset_path = ["training_dataset/dataset (1)"]
             # Use this if needed: "training_dataset/dataset (2)"
-            prediction, proba = svm(dataset_path, img)
+            prediction, proba, original_bgr = svm(dataset_path, img)
             
             # Add text overlay with the predicted class
-            overlay_img = img.copy()
+            overlay_img = Image.fromarray(cv2.cvtColor(original_bgr, cv2.COLOR_BGR2RGB))
             draw = ImageDraw.Draw(overlay_img)
             font = ImageFont.load_default()
                 
