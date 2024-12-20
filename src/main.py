@@ -54,8 +54,8 @@ def select_input_image():
 
         image_display_input_img.config(image=img_tk)
         image_display_input_img.image = img_tk  # Keep a reference to avoid garbage collection  
-    else:
-        selected_image_name.config(text="No Selected Image", fg='red')
+    # else:
+    #     selected_image_name.config(text="No Selected Image", fg='red')
 
 def process_image():
     global RESULT_IMAGE
@@ -72,7 +72,7 @@ def process_image():
               prediction, prob, classes, bounded_img = predict_knn(img)
 
             # Set Result
-            set_prediction(prediction)
+            set_prediction(prediction[0])
             set_probability_details(prob, classes)
 
             # Set Image
@@ -84,11 +84,14 @@ def process_image():
             
             class_labels = ['Bus', 'Car', 'Truck', 'Motorcycle']
             predicted_class_label = predict_class(img_path, class_labels)
-            print(predicted_class_label)
 
-            RESULT_IMAGE = img  # Placeholder for detection function
-            
-            result_log_label.config(text=f"Predicted Class: {predicted_class_label}")
+            # Set Result
+            set_prediction(predicted_class_label)
+
+            RESULT_IMAGE = img.resize((IMAGE_WIDTH, IMAGE_HEIGHT))  # Placeholder for detection function
+            result_log.config(state=tk.NORMAL)
+            result_log.delete("1.0", "end")
+            result_log.config(state=tk.DISABLED)
 
         img_tk = ImageTk.PhotoImage(RESULT_IMAGE)
         image_display_result_img.config(image=img_tk)
@@ -104,7 +107,7 @@ def check_method(event):
       classifiers_dropdown_grid.grid_remove()
       
 def set_prediction(pred:str):
-   predict_label.config(text=f"Predicted: {pred[0].title()}")
+   predict_label.config(text=f"Predicted: {pred.title()}")
 
 def set_probability_details(prob, classes):
   probabilities = prob[0]
