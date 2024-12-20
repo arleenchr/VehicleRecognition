@@ -121,8 +121,8 @@ def set_probability_details(prob, classes):
   log = ""
   for i in range(len(details_list)):
     class_type = details_list[i]['class'].title()
-    prob = round(details_list[i]['probability'], 5)
-    log += f"{i+1}. {class_type}: {prob}\n"
+    prob = round(details_list[i]['probability'] * 100, 2)
+    log += f"{i+1}. {class_type}: {prob}%\n"
 
   result_log.config(state=tk.NORMAL)
   result_log.delete("1.0", "end")
