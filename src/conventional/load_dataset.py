@@ -18,7 +18,7 @@ def load_dataset(dataset_paths):
         for label in os.listdir(dataset_path):  # Loop through each folder (Ambulance, Car, Truck)
             label_path = os.path.join(dataset_path, label)
             if os.path.isdir(label_path):
-                for image_file in os.listdir(label_path):
+                for image_file in os.listdir(label_path)[:60]:
                     image_path = os.path.join(label_path, image_file)
                     print(f'[EXTRACTING FEATURE] {image_path}')
                     try:
