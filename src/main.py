@@ -4,8 +4,8 @@ from tkinter import filedialog
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 import cv2
 
-from conventional.classification.knn import knn
-from conventional.classification.svm import svm
+from conventional.classification.knn import predict_knn
+from conventional.classification.svm import predict_svm
 
 from deep_learning.preprocessing import *
 from deep_learning.model import *
@@ -17,7 +17,6 @@ PAD_HIGHER = 40
 INPUT_IMAGE = None
 INPUT_IMAGE_PATH = None
 RESULT_IMAGE = None
-DL_MODEL = None
 
 def configure_grid(layout: tk.Tk, row: int, col: int, row_weight: list = None, col_weight: list = None, row_minsize: list = None, col_minsize: list = None):
   # Assume len(row_weight) = row and len(col_weight) = col
@@ -58,21 +57,6 @@ def select_input_image():
     else:
         selected_image_name.config(text="No Selected Image", fg='red')
 
-def load_model():
-    global DL_MODEL
-    if DL_MODEL is None:
-        data_dir = './training_dataset/dataset (1)'
-        filepaths, labels = generate_data_paths(data_dir)
-        df = create_df(filepaths, labels)
-
-        train_df, valid_df, test_df = split_dataset(df)
-        train_gen, valid_gen, test_gen = generate_image_data(train_df, valid_df, test_df)
-
-        DL_MODEL = create_model_structure(train_gen)
-        DL_MODEL.load_weights('./src/deep_learning/my_model_weights.h5')
-    
-    return DL_MODEL
-
 def process_image():
     global RESULT_IMAGE
     img = INPUT_IMAGE  # Use your input image here
@@ -81,37 +65,35 @@ def process_image():
         selection = method_dropdown_dropdown.get()
         if selection == "Conventional":
             # Load dataset
-            dataset_path = ["training_dataset/dataset (1)"]
-            # Use this if needed: "training_dataset/dataset (2)"
-            prediction, proba, original_bgr = svm(dataset_path, img)
+           
+            prediction, proba, bounded_img = predict_svm(img)
             
             # Add text overlay with the predicted class
-            overlay_img = Image.fromarray(cv2.cvtColor(original_bgr, cv2.COLOR_BGR2RGB))
-            draw = ImageDraw.Draw(overlay_img)
-            font = ImageFont.load_default()
                 
-            text = f"Class: {prediction[0]}"
-            text_position = (20, 20)  # Adjust position as needed
-            text_color = (255, 0, 0)  # Red color for the text
-            draw.text(text_position, text, fill=text_color, font=font)
+            # text = f"Class: {prediction[0]}"
+            # text_position = (20, 20)  # Adjust position as needed
+            # text_color = (255, 0, 0)  # Red color for the text
+            # draw.text(text_position, text, fill=text_color, font=font)
             
-            accuracy_text = f"Accuracy: {proba.max() * 100:.2f}%"
-            accuracy_position = (20, 40)  # Adjust position as needed
-            draw.text(accuracy_position, accuracy_text, fill=text_color, font=font)
+            # accuracy_text = f"Accuracy: {proba.max() * 100:.2f}%"
+            # accuracy_position = (20, 40)  # Adjust position as needed
+            # draw.text(accuracy_position, accuracy_text, fill=text_color, font=font)
 
-            RESULT_IMAGE = overlay_img
+            bounded_img = Image.fromarray(bounded_img)
+            RESULT_IMAGE = bounded_img
         else:  # selection == "Deep Learning"
             # TO DO
             print("Deep Learning")
             
-            model = load_model()
             class_labels = ['Bus', 'Car', 'Truck', 'Motorcycle']
-            predicted_class_label = predict_class(img_path, model, class_labels)
+            predicted_class_label = predict_class(img_path, class_labels)
             print(predicted_class_label)
 
             RESULT_IMAGE = img  # Placeholder for detection function
-        result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
-        img_tk = ImageTk.PhotoImage(result_img)
+            
+            result_log_label.config(text=f"Predicted Class: {predicted_class_label}")
+
+        img_tk = ImageTk.PhotoImage(RESULT_IMAGE)
         image_display_result_img.config(image=img_tk)
         image_display_result_img.image = img_tk
     else:
@@ -210,6 +192,9 @@ if __name__ == "__main__":
 
   result_panel_title = tk.Label(result_panel, text="Result Log", font=("Helvetica", 16, "bold"))
   result_panel_title.grid(row=0, column=0, sticky='nsew')
+  
+  result_log_label = tk.Label(result_panel, text="", font=("Helvetica", 12), justify="left")
+  result_log_label.grid(row=1, column=0, sticky="nsew")
 
   # Run the application
   root.mainloop()
