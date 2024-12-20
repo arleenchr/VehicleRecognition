@@ -4,8 +4,8 @@ from tkinter import filedialog
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 import cv2
 
-from conventional.classification.knn import knn
-from conventional.classification.svm import svm
+from conventional.classification.knn import predict_knn
+from conventional.classification.svm import predict_svm
 
 from deep_learning.preprocessing import *
 from deep_learning.model import *
@@ -81,25 +81,22 @@ def process_image():
         selection = method_dropdown_dropdown.get()
         if selection == "Conventional":
             # Load dataset
-            dataset_path = ["training_dataset/dataset (1)"]
-            # Use this if needed: "training_dataset/dataset (2)"
-            prediction, proba, original_bgr = svm(dataset_path, img)
+           
+            prediction, proba, bounded_img = predict_svm(img)
             
             # Add text overlay with the predicted class
-            overlay_img = Image.fromarray(cv2.cvtColor(original_bgr, cv2.COLOR_BGR2RGB))
-            draw = ImageDraw.Draw(overlay_img)
-            font = ImageFont.load_default()
                 
-            text = f"Class: {prediction[0]}"
-            text_position = (20, 20)  # Adjust position as needed
-            text_color = (255, 0, 0)  # Red color for the text
-            draw.text(text_position, text, fill=text_color, font=font)
+            # text = f"Class: {prediction[0]}"
+            # text_position = (20, 20)  # Adjust position as needed
+            # text_color = (255, 0, 0)  # Red color for the text
+            # draw.text(text_position, text, fill=text_color, font=font)
             
-            accuracy_text = f"Accuracy: {proba.max() * 100:.2f}%"
-            accuracy_position = (20, 40)  # Adjust position as needed
-            draw.text(accuracy_position, accuracy_text, fill=text_color, font=font)
+            # accuracy_text = f"Accuracy: {proba.max() * 100:.2f}%"
+            # accuracy_position = (20, 40)  # Adjust position as needed
+            # draw.text(accuracy_position, accuracy_text, fill=text_color, font=font)
 
-            RESULT_IMAGE = overlay_img
+            bounded_img = Image.fromarray(bounded_img)
+            RESULT_IMAGE = bounded_img
         else:  # selection == "Deep Learning"
             # TO DO
             print("Deep Learning")
@@ -110,8 +107,8 @@ def process_image():
             print(predicted_class_label)
 
             RESULT_IMAGE = img  # Placeholder for detection function
-        result_img = RESULT_IMAGE.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
-        img_tk = ImageTk.PhotoImage(result_img)
+
+        img_tk = ImageTk.PhotoImage(RESULT_IMAGE)
         image_display_result_img.config(image=img_tk)
         image_display_result_img.image = img_tk
     else:
