@@ -42,7 +42,7 @@ def preprocess_image(pil_image, target_feature_size):
 
     # Bound image using bounding box
     bounded_img = img_resized.copy()
-    cv2.rectangle(bounded_img, top_left, bottom_right, 255, 2)
+    cv2.rectangle(bounded_img, top_left, bottom_right, (255, 0, 0), 2)
 
     # Adjust the features to match the target size
     if len(hog_features) > target_feature_size:
