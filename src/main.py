@@ -44,7 +44,7 @@ def select_input_image():
 
     if file_path:
         # Display the selected file path
-        selected_image_name.config(text=f"{filename}", fg="blue")
+        selected_image_name.config(text=filename[:15] + ("..." if len(filename) > 15 else ""), fg='black')
         INPUT_IMAGE_PATH = file_path
          # Load and display the image
         img = Image.open(file_path)

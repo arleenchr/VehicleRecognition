@@ -1,24 +1,17 @@
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.preprocessing import StandardScaler
 from conventional.load_dataset import load_dataset
 from conventional.preprocess_image import preprocess_image
 import time
-import cv2
 import os
 import pickle
-from constant import DATASET_PATH
 
 # SVM
 svm_model_file_path = os.path.join(os.getcwd(), 'src', 'conventional', 'model', 'svm_model.pkl')
 
 def train_svm(dataset_path: list):
     features, labels = load_dataset(dataset_path)
-
-    # Feature scaling
-    # scaler = StandardScaler()
-    # features_scaled = scaler.fit_transform(features)
 
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(
@@ -58,8 +51,6 @@ def predict_svm(img):
 
     # Preprocess new image
     feature = feature.reshape(1, -1)
-    # scaler = MinMaxScaler()
-    # feature = scaler.fit_transform(feature)
 
     # Predict new image
     proba = svm.predict_proba(feature)
