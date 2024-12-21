@@ -71,6 +71,9 @@ def process_image():
             else:
               prediction, prob, classes, bounded_img = predict_knn(img)
 
+            print(prediction)
+            print(prob)
+            print(classes)
             # Set Result
             set_prediction(prediction[0])
             set_probability_details(prob, classes)

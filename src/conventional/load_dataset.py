@@ -5,7 +5,7 @@ from conventional.preprocess_image import preprocess_image
 from constant import IMAGE_HEIGHT, IMAGE_WIDTH
 
 # Assuming preprocess_image returns features and hog_image
-def load_dataset(dataset_paths):
+def load_dataset(dataset_paths, amount_each_class: int = 200):
     features = []
     labels = []
     
@@ -18,7 +18,7 @@ def load_dataset(dataset_paths):
         for label in os.listdir(dataset_path):  # Loop through each folder (Ambulance, Car, Truck)
             label_path = os.path.join(dataset_path, label)
             if os.path.isdir(label_path):
-                for image_file in os.listdir(label_path):
+                for image_file in os.listdir(label_path)[:amount_each_class]:
                     image_path = os.path.join(label_path, image_file)
                     print(f'[EXTRACTING FEATURE] {image_path}')
                     try:

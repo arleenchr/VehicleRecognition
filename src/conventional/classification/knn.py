@@ -10,8 +10,8 @@ import pickle
 # KNN
 knn_model_file_path = os.path.join(os.getcwd(), 'src', 'conventional', 'model', 'knn_model.pkl')
 
-def train_knn(dataset_path):
-    features, labels = load_dataset(dataset_path)
+def train_knn(dataset_path : list, amount_each_class: int = 200):
+    features, labels = load_dataset(dataset_path, amount_each_class)
 
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(

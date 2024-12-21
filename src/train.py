@@ -6,10 +6,10 @@ from constant import DATASET_PATH
 
 if __name__ == "__main__":
   print(f"[TRAINING] Start training SVM model")
-  train_svm(DATASET_PATH)
+  train_svm(DATASET_PATH[:1])
 
   print(f"[TRAINING] Start training KNN model")
-  train_knn(DATASET_PATH)
+  train_knn(DATASET_PATH[:1])
 
-  print(f"[TRAINING] Start training CNN model")
-  load_model(DATASET_PATH[0])
+  # print(f"[TRAINING] Start training CNN model")
+  # load_model(DATASET_PATH[0])
