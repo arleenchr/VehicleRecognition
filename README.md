@@ -39,20 +39,41 @@ Program yang dibuat dalam tugas ini memiliki kegunaan utama sebagai sistem untuk
 2. Pengenalan kendaraan dengan metode Deep Learning dan CNN
 
 ## Requirements
-1. Visual Studio Code
-2. Python (default version: 3.10.11)
-3. Library requirements in requirement.txt
+1. Python (<i>default version</i>: 3.10.11)
+2. <i>Library</i> pada `requirements.txt`
 
 ## Cara Menjalankan Program
-Langkah-langkah proses setup program adalah sebagai berikut:
-1. Clone repository ini
-2. Membuka Program dengan Visual Studio Code (pastikan sudah menginstall Python)
-3. Menjalankan file `main.py` yang terdapat di dalam folder `src` (pastikan sudah menginstall semua Library yang dibutuhkan)
-5. Program sudah bisa dijalankan
+Langkah-langkah proses <i>setup</i> program adalah sebagai berikut:
+1. <i>Clone</i> repositori ini.
+2. [Unduh model CNN](https://drive.google.com/drive/folders/1Rs3EfxcR26MKE-fb0b4-lvCUjBVYG8za?usp=sharing) dan letakkan pada `src/deep_learning/model/cnn_model.pkl`.
+3. Jalankan <i>file</i> `main.py` yang terdapat di dalam folder `src` dengan perintah berikut:
+```
+python src/main.py
+```
+atau 
+```
+./run.bat
+```
+Keterangan: Pastikan sudah meng-<i>install</i> semua <i>library</i> yang dibutuhkan.
+
+## Cara Melatih Model
+1. [Unduh <i>file</i> bobot model CNN](https://www.kaggle.com/code/eyadgk/vehicle-rec-via-efficientnet-100-acc-full-guide/output) dan letakkan pada `src/deep_learning/my_model_weights.h5`.
+2. Jalankan program `train.py` pada folder `src` dengan perintah berikut:
+```
+python src/train.py
+``` 
+atau
+```
+./train.bat
+```
 
 ## Tampilan GUI Program
 ![Screenshot (498)](https://github.com/user-attachments/assets/5a654a70-51e5-4b31-a756-5fd7df7ef373)
 
+## Dataset & Pre-trained Model
+- [Dataset 1](https://www.kaggle.com/code/kaggleashwin/dataset-collection-for-vehicle-type-recognition )
+- [Dataset 2](https://www.kaggle.com/datasets/rohan300557/vehicle-detection)
+- [Pre-trained Model](https://www.kaggle.com/code/eyadgk/vehicle-rec-via-efficientnet-100-acc-full-guide/notebook)
 
 ## Pembagian Kerja
 <table>
@@ -75,7 +96,7 @@ Langkah-langkah proses setup program adalah sebagai berikut:
         <td>Arleen Chrysantha Gunardi</td>
         <td>
           <ul>
-          <li> Pengenalan kendaraan dengan metode Konvensional menggunakan pembelajaran CNN menggunakan EfficientNet
+          <li> Pengenalan kendaraan dengan metode pembelajaran mendalam dengan CNN (EfficientNet)
           </ul>
         </td>
     </tr>
