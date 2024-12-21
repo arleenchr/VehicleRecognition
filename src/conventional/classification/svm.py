@@ -54,8 +54,6 @@ def predict_svm(img):
 
     # Predict new image
     proba = svm.predict_proba(feature)
-    prediction = svm.predict(feature)
     classes = svm.classes_
-    print(f"Predicted Class: {prediction[0]}, Probabilities: {proba[0]}")
 
-    return prediction, proba, classes, bounded_image
+    return  proba, classes, bounded_image

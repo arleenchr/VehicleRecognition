@@ -59,8 +59,6 @@ def predict_knn(img):
     
     # Predict new image
     proba = knn.predict_proba(feature)
-    prediction = knn.predict(feature)
     classes = knn.classes_
-    print(f"Predicted Class: {prediction[0]}, Probabilities: {proba[0]}")
 
-    return prediction, proba, classes, bounded_image
+    return proba, classes, bounded_image

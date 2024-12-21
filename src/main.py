@@ -67,15 +67,11 @@ def process_image():
             # Load dataset
             classifier = classifiers_dropdown_dropdown.get()
             if (classifier == "SVM"):
-              prediction, prob, classes, bounded_img = predict_svm(img)
+              prob, classes, bounded_img = predict_svm(img)
             else:
-              prediction, prob, classes, bounded_img = predict_knn(img)
+              prob, classes, bounded_img = predict_knn(img)
 
-            print(prediction)
-            print(prob)
-            print(classes)
             # Set Result
-            set_prediction(prediction[0])
             set_probability_details(prob, classes)
 
             # Set Image
@@ -123,6 +119,7 @@ def set_probability_details(prob, classes):
     details_list[i]["probability"] = prob
 
   details_list.sort(key=lambda x: x['probability'], reverse=True)
+  set_prediction(details_list[0]['class'])
   
   log = ""
   for i in range(len(details_list)):
@@ -134,6 +131,7 @@ def set_probability_details(prob, classes):
   result_log.delete("1.0", "end")
   result_log.insert("1.0", log)
   result_log.config(state=tk.DISABLED)
+
 
 
 ############################################################################

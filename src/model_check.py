@@ -15,7 +15,7 @@ if __name__ == "__main__":
   with open(svm_model_file_path, 'rb') as f:
       svm = pickle.load(f)
 
-  features, labels = load_dataset(DATASET_PATH)
+  features, labels = load_dataset(DATASET_PATH[:1])
   _, X_test, _, y_test = train_test_split(
         features, labels, test_size=0.2, stratify=labels, random_state=42
     )
